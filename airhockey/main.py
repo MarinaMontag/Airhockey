@@ -1,7 +1,24 @@
-import pygame
+import pygame  # imports the package with all the available pygame modules
+import pymunk
+
+pygame.init()  # initializes each of pygame modules
+
+size = (width, height) = (1000, 600)
+
+display = pygame.display.set_mode(size)
+
+clock = pygame.time.Clock()
+fps = 50  # frames per second
 
 
-if __name__ == '__main__':
-    print('PyCharm')
+def game():
+    while True:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                return
+        pygame.display.update()
+        clock.tick(fps)
 
-# See PyCharm help at https://www.jetbrains.com/help/pycharm/
+
+game()
+pygame.quit()
