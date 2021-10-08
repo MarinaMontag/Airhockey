@@ -13,13 +13,15 @@ def restart_round_if_ended(keys, ball):
         ball.move()
 
 
-def play(keys, up, down, player):
-    if keys[up]:
-        player.move()
-    elif keys[down]:
-        player.move(False)
-    else:
-        player.stop()
+def play(keys, up, down, player, ball, top, bottom):
+    if not player.on_edge(top, bottom):
+        if ball.body.velocity != (0, 0):
+            if keys[up]:
+                player.move()
+            elif keys[down]:
+                player.move(False)
+            else:
+                player.stop()
 
 
 def game_over(player_1, player_2):
@@ -29,13 +31,15 @@ def game_over(player_1, player_2):
     return False
 
 
-def pong_game(size=(1000, 600), fps=100, ball_radius=8, velocity=(400, -300), goal_left_collision_type=1,
-              goal_right_collision_type=2, ball_collision_type=3, offset=20, field_color=(0, 0, 0, 0)):
+def pong_game(size=(1000, 600), fps=100, ball_radius=10, velocity=[700, 300], goal_left_collision_type=1,
+              goal_right_collision_type=2, ball_collision_type=3, offset=20, field_color=(0, 0, 0, 0),
+              player_thickness=12, player_velocity=800, center_line_thickness=4,
+              center_line_color=(255, 255, 255, 255)):
     display, space, clock = init_game(size)
 
-    left = size[0] / 20
+    left = size[0] / 40
     right = size[0] - left
-    top = size[1] / 24
+    top = size[1] / 17
     bottom = size[1] - top
     middleX = size[0] / 2
     middleY = size[1] / 2
@@ -44,11 +48,11 @@ def pong_game(size=(1000, 600), fps=100, ball_radius=8, velocity=(400, -300), go
     goal_height = field_height / parts
     goal_top = goal_height * (parts - 1) / 2 + top
     goal_bottom = goal_top + goal_height
-    left_player = left + offset
-    right_player = right - offset
+    player_1_pos = left + offset
+    player_2_pos = right - offset
 
-    player_1 = Player(display, space, left_player)
-    player_2 = Player(display, space, right_player)
+    player_1 = Player(display, space, player_1_pos, thickness=player_thickness, velocity=player_velocity)
+    player_2 = Player(display, space, player_2_pos, thickness=player_thickness, velocity=player_velocity)
 
     ball = Ball(display, space, player_1, player_2, x=middleX, y=middleY, radius=ball_radius, velocity=velocity,
                 collision_type=ball_collision_type)
@@ -77,16 +81,6 @@ def pong_game(size=(1000, 600), fps=100, ball_radius=8, velocity=(400, -300), go
                 pygame.quit()
                 return
 
-        if game_over(player_1, player_2):
-            return
-
-        keys = pygame.key.get_pressed()
-
-        restart_round_if_ended(keys, ball)
-
-        play(keys, pygame.K_UP, pygame.K_DOWN, player_2)
-        play(keys, pygame.K_w, pygame.K_s, player_1)
-
         display.fill(field_color)
         ball.draw()
         wall_left_top.draw()
@@ -99,6 +93,16 @@ def pong_game(size=(1000, 600), fps=100, ball_radius=8, velocity=(400, -300), go
         goal_right.draw()
         player_1.draw()
         player_2.draw()
+        pygame.draw.line(display, center_line_color, [middleX, top], [middleX, bottom], center_line_thickness)
+        if game_over(player_1, player_2):
+            return
+
+        keys = pygame.key.get_pressed()
+
+        play(keys, pygame.K_UP, pygame.K_DOWN, player_2, ball, top, bottom)
+        play(keys, pygame.K_w, pygame.K_s, player_1, ball, top, bottom)
+
+        restart_round_if_ended(keys, ball)
 
         pygame.display.update()
         clock.tick(fps)
