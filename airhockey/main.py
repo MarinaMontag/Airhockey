@@ -22,8 +22,15 @@ def play(keys, up, down, player):
         player.stop()
 
 
-def pong_game(size=(1000, 600), fps=100, ball_radius=8, velocity=(400, -300), goal_collision_type=2,
-              ball_collision_type=1, offset=20, field_color=(0, 0, 0, 0)):
+def game_over(player_1, player_2):
+    if player_1.winner or player_2.winner:
+        pygame.quit()
+        return True
+    return False
+
+
+def pong_game(size=(1000, 600), fps=100, ball_radius=8, velocity=(400, -300), goal_left_collision_type=1,
+              goal_right_collision_type=2, ball_collision_type=3, offset=20, field_color=(0, 0, 0, 0)):
     display, space, clock = init_game(size)
 
     left = size[0] / 20
@@ -54,18 +61,24 @@ def pong_game(size=(1000, 600), fps=100, ball_radius=8, velocity=(400, -300), go
     wall_bottom = Wall(display, space, [left, bottom], [right, bottom])
 
     goal_left = Wall(display, space, [left, goal_top], [left, goal_bottom], color=(255, 0, 0),
-                     collision_type=goal_collision_type)
+                     collision_type=goal_left_collision_type)
     goal_right = Wall(display, space, [right, goal_top], [right, goal_bottom], color=(0, 0, 255),
-                      collision_type=goal_collision_type)
+                      collision_type=goal_right_collision_type)
 
-    scored = space.add_collision_handler(ball_collision_type, goal_collision_type)
-    scored.begin = ball.to_start_position
+    scored_left = space.add_collision_handler(ball_collision_type, goal_left_collision_type)
+    scored_left.begin = ball.right_won
+
+    scored_right = space.add_collision_handler(ball_collision_type, goal_right_collision_type)
+    scored_right.begin = ball.left_won
 
     while True:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 return
+
+        if game_over(player_1, player_2):
+            return
 
         keys = pygame.key.get_pressed()
 
