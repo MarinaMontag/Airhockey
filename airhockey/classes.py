@@ -1,7 +1,8 @@
 import random
-
+import pygame.gfxdraw
 import pygame
 import pymunk
+from PIL import Image, ImageDraw
 
 
 class Ball:
@@ -88,7 +89,7 @@ class Wall:
 
 class Player:
     def __init__(self, display, space, x, radius=30, color=(255, 255, 255), elasticity=1,
-                 collision_type=None, group=None, max_score=3, winner=None, velocity=800):
+                 collision_type=None, group=None, max_score=3, winner=None, velocity=800, arc=(90, -90)):
         self.display = display
         self.space = space
         self.radius = radius
@@ -103,6 +104,7 @@ class Player:
         self.max_score = max_score
         self.winner = winner
         self.velocity = velocity
+        self.arc = arc
         if collision_type is not None:
             self.shape.collision_type = collision_type
         if group is not None:
@@ -111,7 +113,16 @@ class Player:
 
     def draw(self):
         x, y = self.body.position
-        pygame.draw.circle(self.display, self.color, (int(x), int(y)), self.radius)
+        pil_size = self.radius*2
+        pil_image = Image.new("RGBA", (pil_size, pil_size))
+        pil_draw = ImageDraw.Draw(pil_image)
+        pil_draw.pieslice((0, 0, pil_size-1, pil_size-1), self.arc[0], self.arc[1], fill=self.color)
+        mode = pil_image.mode
+        size = pil_image.size
+        data = pil_image.tobytes()
+        image = pygame.image.fromstring(data, size, mode)
+        image_rect = image.get_rect(center=(int(x), int(y)))
+        self.display.blit(image, image_rect)
 
     def move_up(self):
         self.body.velocity = (0, -self.velocity)
@@ -147,9 +158,9 @@ class Player:
 
 class Bot(Player):
     def __init__(self, display, space, x, radius=30, color=(255, 255, 255), elasticity=1,
-                 collision_type=None, group=None, max_score=3, winner=None, velocity=400):
+                 collision_type=None, group=None, max_score=3, winner=None, velocity=400, arc=(-90, 90)):
         Player.__init__(self, display, space, x, radius, color, elasticity,
-                        collision_type, group, max_score, winner, velocity)
+                        collision_type, group, max_score, winner, velocity, arc)
 
     def bot_play(self, ball, top, bottom):
         self.on_edge(top, bottom)
