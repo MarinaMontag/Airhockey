@@ -15,7 +15,7 @@ def print_text(display, text, x, y, font_size, bold=True, italic=False, color=(2
 
 def pong_game(size=(1000, 600), fps=100, ball_radius=10, ball_velocity=[700, 300], goal_left_collision_type=1,
               goal_right_collision_type=2, ball_collision_type=3, offset=20, field_color=(0, 0, 0, 0),
-              player_thickness=12, player_velocity=800, center_line_thickness=4,
+              player_radius=30, player_velocity=800, center_line_thickness=4,
               center_line_color=(255, 255, 255, 255)):
     pygame.init()  # initializes each of pygame modules
     display, space, clock = pygame.display.set_mode(size), pymunk.Space(), pygame.time.Clock()
@@ -36,8 +36,8 @@ def pong_game(size=(1000, 600), fps=100, ball_radius=10, ball_velocity=[700, 300
     text_score_size = 30
     congrats_text_size = int(size[1]/5)
 
-    bot = Bot(display, space, bot_pos, thickness=player_thickness, velocity=player_velocity/2)
-    player = Player(display, space, player_pos, thickness=player_thickness, velocity=player_velocity)
+    bot = Bot(display, space, bot_pos, radius=player_radius, velocity=200)
+    player = Player(display, space, player_pos, radius=player_radius, velocity=player_velocity)
 
     ball = Ball(display, space, bot, player, x=middleX, y=middleY, radius=ball_radius, velocity=ball_velocity,
                 collision_type=ball_collision_type)

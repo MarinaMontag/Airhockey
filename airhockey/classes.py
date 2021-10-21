@@ -5,9 +5,10 @@ import pymunk
 
 
 class Ball:
-    def __init__(self, display, space, left, right, x=0, y=0, radius=10, velocity=[0, 0], density=1,
-                 elasticity=1,
-                 collision_type=None, color=(255, 255, 255)):
+    def __init__(self, display, space, left, right, x=0, y=0, radius=10, velocity=None, density=1,
+                 elasticity=1, collision_type=None, color=(255, 255, 255)):
+        if velocity is None:
+            velocity = [0, 0]
         self.display = display
         self.space = space
         self.color = color
@@ -86,20 +87,17 @@ class Wall:
 
 
 class Player:
-    def __init__(self, display, space, x, center_offset=30, thickness=10, color=(255, 255, 255), elasticity=1,
+    def __init__(self, display, space, x, radius=30, color=(255, 255, 255), elasticity=1,
                  collision_type=None, group=None, max_score=3, winner=None, velocity=800):
         self.display = display
         self.space = space
-        self.thickness = thickness
+        self.radius = radius
         self.color = color
         self.x = x
-        self.center_offset = center_offset
         middleY = self.display.get_height() / 2
         self.body = pymunk.Body(body_type=pymunk.Body.KINEMATIC)
         self.body.position = (self.x, middleY)
-        self.start = [0, -center_offset]
-        self.end = [0, center_offset]
-        self.shape = pymunk.Segment(self.body, self.start, self.end, self.thickness)
+        self.shape = pymunk.Circle(self.body, self.radius)
         self.shape.elasticity = elasticity
         self.score = 0
         self.max_score = max_score
@@ -112,9 +110,8 @@ class Player:
         self.space.add(self.body, self.shape)
 
     def draw(self):
-        p1 = self.body.local_to_world(self.shape.a)
-        p2 = self.body.local_to_world(self.shape.b)
-        pygame.draw.line(self.display, self.color, p1, p2, self.thickness)
+        x, y = self.body.position
+        pygame.draw.circle(self.display, self.color, (int(x), int(y)), self.radius)
 
     def move_up(self):
         self.body.velocity = (0, -self.velocity)
@@ -140,18 +137,18 @@ class Player:
         self.stop()
 
     def on_edge(self, top, bottom):
-        if self.body.local_to_world(self.shape.a)[1] <= top:
+        if int(self.body.position[1]) <= top:
             self.body.velocity = (0, 0)
-            self.body.position = (self.body.position[0], top + self.center_offset)
-        if self.body.local_to_world(self.shape.b)[1] >= bottom:
+            self.body.position = (self.body.position[0], top + self.radius)
+        if int(self.body.position[1]) >= bottom:
             self.body.velocity = (0, 0)
-            self.body.position = (self.body.position[0], bottom - self.center_offset)
+            self.body.position = (self.body.position[0], bottom - self.radius)
 
 
 class Bot(Player):
-    def __init__(self, display, space, x, center_offset=30, thickness=10, color=(255, 255, 255), elasticity=1,
+    def __init__(self, display, space, x, radius=30, color=(255, 255, 255), elasticity=1,
                  collision_type=None, group=None, max_score=3, winner=None, velocity=400):
-        Player.__init__(self, display, space, x, center_offset, thickness, color, elasticity,
+        Player.__init__(self, display, space, x, radius, color, elasticity,
                         collision_type, group, max_score, winner, velocity)
 
     def bot_play(self, ball, top, bottom):
@@ -169,7 +166,7 @@ class Bot(Player):
             self.going_to_center()
 
     def going_to_center(self):
-        position = self.body.local_to_world(self.shape.a)[1] + self.center_offset
+        position = int(self.body.position[1])
         center = self.display.get_height() / 2
         if position < center:
             self.move_down()
