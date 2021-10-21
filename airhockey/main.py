@@ -16,7 +16,7 @@ def print_text(display, text, x, y, font_size, bold=True, italic=False, color=(2
 def pong_game(size=(1000, 600), fps=100, ball_radius=10, ball_velocity=[700, 300], goal_left_collision_type=1,
               goal_right_collision_type=2, ball_collision_type=3, offset=20, field_color=(0, 0, 0, 0),
               player_radius=20, player_velocity=800, bot_velocity=100, center_line_thickness=4,
-              center_line_color=(255, 255, 255, 255)):
+              center_line_color=(255, 255, 255, 255), max_score=1):
     pygame.init()  # initializes each of pygame modules
     display, space, clock = pygame.display.set_mode(size), pymunk.Space(), pygame.time.Clock()
 
@@ -34,10 +34,11 @@ def pong_game(size=(1000, 600), fps=100, ball_radius=10, ball_velocity=[700, 300
     bot_pos = left_corner_pos + offset
     player_pos = right_corner_pos - offset
     text_score_size = 30
-    congrats_text_size = int(size[1]/5)
+    congrats_text_size = int(size[1]/6)
 
-    bot = Bot(display, space, bot_pos, radius=player_radius, velocity=bot_velocity)
-    player = Player(display, space, player_pos, radius=player_radius, velocity=player_velocity)
+    bot = Bot(display, space, bot_pos, radius=player_radius, max_score=max_score, velocity=bot_velocity)
+    player = Player(display, space, player_pos, radius=player_radius, max_score=max_score,
+                    velocity=player_velocity)
 
     ball = Ball(display, space, bot, player, x=middleX, y=middleY, radius=ball_radius, velocity=ball_velocity,
                 collision_type=ball_collision_type)
@@ -94,9 +95,9 @@ def pong_game(size=(1000, 600), fps=100, ball_radius=10, ball_velocity=[700, 300
 
             restart_round_if_ended(keys, ball)
         elif bot.winner:
-            print_text(display, 'Winner is Bot', left_corner_pos, int(size[1]/3), congrats_text_size)
+            print_text(display, 'The Winner is Bot', left_corner_pos, int(size[1]/3), congrats_text_size)
         else:
-            print_text(display, 'Winner is Player', left_corner_pos, int(size[1]/3), congrats_text_size)
+            print_text(display, 'The Winner is Player', left_corner_pos, int(size[1]/3), congrats_text_size)
         pygame.display.update()
         clock.tick(fps)
         space.step(1 / fps)
