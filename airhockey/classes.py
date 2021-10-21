@@ -116,17 +116,28 @@ class Player:
         p2 = self.body.local_to_world(self.shape.b)
         pygame.draw.line(self.display, self.color, p1, p2, self.thickness)
 
-    def move(self, up=True):
-        if up:
-            self.body.velocity = (0, -self.velocity)
-        else:
-            self.body.velocity = (0, self.velocity)
+    def move_up(self):
+        self.body.velocity = (0, -self.velocity)
+
+    def move_down(self):
+        self.body.velocity = (0, self.velocity)
+
+    def play(self, keys, up, down, ball, top, bottom):
+        if not self.on_edge(top, bottom):
+            if ball.body.velocity != (0, 0):
+                if keys[up]:
+                    self.move_up()
+                elif keys[down]:
+                    self.move_down()
+                else:
+                    self.stop()
 
     def stop(self):
         self.body.velocity = (0, 0)
 
     def to_start_position(self):
         self.body.position = (self.x, self.display.get_height() / 2)
+        self.stop()
 
     def on_edge(self, top, bottom):
         if self.body.local_to_world(self.shape.a)[1] <= top:
@@ -135,4 +146,24 @@ class Player:
         if self.body.local_to_world(self.shape.b)[1] >= bottom:
             self.body.velocity = (0, 0)
             self.body.position = (self.body.position[0], bottom - self.center_offset)
+
+
+class Bot(Player):
+    def __init__(self, display, space, x, center_offset=30, thickness=10, color=(255, 255, 255), elasticity=1,
+                 collision_type=None, group=None, max_score=3, winner=None, velocity=400):
+        Player.__init__(self, display, space, x, center_offset, thickness, color, elasticity,
+                        collision_type, group, max_score, winner, velocity)
+
+    def bot_play(self, ball, top, bottom):
+        self.on_edge(top, bottom)
+        bot_y = int(self.body.position[1])
+        if ball.body.velocity != (0, 0) and int(ball.body.position[0]) < self.display.get_width() / 2\
+                and ball.body.velocity[0] < 0:
+            if int(ball.body.position[1]) < bot_y:
+                self.move_up()
+            elif int(ball.body.position[1]) > bot_y:
+                self.move_down()
+            else:
+                self.stop()
+
 
