@@ -157,7 +157,7 @@ class Bot(Player):
     def bot_play(self, ball, top, bottom):
         self.on_edge(top, bottom)
         bot_y = int(self.body.position[1])
-        if ball.body.velocity != (0, 0) and int(ball.body.position[0]) < self.display.get_width() / 2\
+        if ball.body.velocity != (0, 0) and int(ball.body.position[0]) < self.display.get_width() / 2 \
                 and ball.body.velocity[0] < 0:
             if int(ball.body.position[1]) < bot_y:
                 self.move_up()
@@ -165,5 +165,15 @@ class Bot(Player):
                 self.move_down()
             else:
                 self.stop()
+        else:
+            self.going_to_center()
 
-
+    def going_to_center(self):
+        position = self.body.local_to_world(self.shape.a)[1] + self.center_offset
+        center = self.display.get_height() / 2
+        if position < center:
+            self.move_down()
+        elif position > center:
+            self.move_up()
+        else:
+            self.stop()
