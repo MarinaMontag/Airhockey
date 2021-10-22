@@ -67,7 +67,7 @@ class Ball:
 
 class Wall:
     def __init__(self, display, space, start, end, collision_type=None, elasticity=1, thickness=8,
-                 color=(255, 255, 255), group=None):
+                 color=(255, 255, 255)):
         self.display = display
         self.space = space
         self.color = color
@@ -80,16 +80,14 @@ class Wall:
         self.space.add(self.body, self.shape)
         if collision_type is not None:
             self.shape.collision_type = collision_type
-        if group is not None:
-            self.shape.filter = pymunk.ShapeFilter(group=group)
 
     def draw(self):
         pygame.draw.line(self.display, self.color, self.shape.a, self.shape.b, self.thickness)
 
 
 class Player:
-    def __init__(self, display, space, x, radius=30, color=(255, 255, 255), elasticity=1,
-                 collision_type=None, group=None, max_score=3, winner=None, velocity=800, arc=(90, -90)):
+    def __init__(self, display, space, x, radius=30, color=(255, 255, 255), elasticity=1,max_score=3, winner=None,
+                 velocity=800, arc=(90, -90)):
         self.display = display
         self.space = space
         self.radius = radius
@@ -105,10 +103,6 @@ class Player:
         self.winner = winner
         self.velocity = velocity
         self.arc = arc
-        if collision_type is not None:
-            self.shape.collision_type = collision_type
-        if group is not None:
-            self.shape.filter = pymunk.ShapeFilter(group=group)
         self.space.add(self.body, self.shape)
 
     def draw(self):
@@ -158,9 +152,8 @@ class Player:
 
 class Bot(Player):
     def __init__(self, display, space, x, radius=30, color=(255, 255, 255), elasticity=1,
-                 collision_type=None, group=None, max_score=3, winner=None, velocity=400, arc=(-90, 90)):
-        Player.__init__(self, display, space, x, radius, color, elasticity,
-                        collision_type, group, max_score, winner, velocity, arc)
+                 max_score=3, winner=None, velocity=400, arc=(-90, 90)):
+        Player.__init__(self, display, space, x, radius, color, elasticity, max_score, winner, velocity, arc)
 
     def bot_play(self, ball, top, bottom):
         self.on_edge(top, bottom)
